@@ -570,6 +570,7 @@ def start_training(
 
     yield emit(f"Command: {' '.join(shlex.quote(c) for c in cmd)}")
     yield emit("")
+    yield emit("⏳ Launching training process...")
 
     # --- Set up log file ---
     timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -579,6 +580,7 @@ def start_training(
     env = os.environ.copy()
     env["CUDA_VISIBLE_DEVICES"] = gpu_idx
     env["PYTHONUNBUFFERED"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
 
     # --- Launch subprocess ---
     try:
@@ -596,6 +598,9 @@ def start_training(
     except FileNotFoundError:
         yield emit("❌ 'accelerate' not found. Make sure the venv is activated and accelerate is installed.")
         return
+
+    yield emit(f"✓ Process started (PID: {process.pid}). Loading models — this may take several minutes...")
+    yield emit("")
 
     # --- Stream output ---
     with open(log_file_path, "w", encoding="utf-8", errors="ignore") as log_f:
@@ -956,8 +961,9 @@ def build_ui() -> gr.Blocks:
 
 if __name__ == "__main__":
     demo = build_ui()
+    server_name = os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1")
     demo.launch(
-        server_name="127.0.0.1",
+        server_name=server_name,
         server_port=7860,
         show_error=True,
     )
