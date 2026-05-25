@@ -92,11 +92,38 @@ Eğitim bittikten sonra pod sayfasında → **Stop** (Terminate değil, dosyalar
 
 ---
 
+## Sıradaki Adımlar Sırası (unutma!)
+
+1. **Configure Training** butonuna bas → ✓ yazısı çıksın
+2. **Start Training** butonuna bas
+
+> Configure Training atlanırsa `❌ No training config found` hatası çıkar.
+
+---
+
 ## Sorun Giderme
 
 | Hata | Çözüm |
 |------|-------|
-| `sd-scripts: No such file or directory` | `cd /workspace/anima-trainer && git submodule update --init --recursive` |
+| `sd-scripts: No such file or directory` | Aşağıya bak |
+| `Training script not found: .../anima_train_network.py` | Aşağıya bak |
 | `accelerate not found` | Script otomatik bulur, sorun devam ederse `pip install accelerate` |
 | Arayüz açılmıyor | Pod sayfasında port 7860 expose edilmiş mi kontrol et |
 | `avr_loss=nan` | Optimizer'ı AdamW yap, AdamW8bit deneme |
+| Terminal boş satırda bekliyor | Bekle — büyük repo indiriyor olabilir (2-3 dk) |
+
+### sd-scripts eksik hatası
+
+Script çalıştıktan sonra bu hata çıkarsa submodule tam inmemiş demektir:
+
+```bash
+cd /workspace/anima-trainer && git submodule update --init --recursive
+```
+
+Bittikten sonra (terminal prompt'a dönünce) scripti yeniden çalıştır:
+
+```bash
+bash /workspace/anima-trainer/runpod_start.sh
+```
+
+> Not: Submodule inderken terminal boş satırda durur, bu normal. 2-3 dakika bekle.
