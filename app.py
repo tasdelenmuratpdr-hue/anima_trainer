@@ -718,6 +718,12 @@ def clear_done_jobs() -> tuple[str, str]:
     return "✓ Cleared finished jobs.", format_queue_html(q)
 
 
+def clear_all_jobs() -> tuple[str, str]:
+    with _queue_lock:
+        save_queue([])
+    return "✓ Queue cleared.", ""
+
+
 def format_queue_html(q: list[dict]) -> str:
     if not q:
         return "Queue is empty."
@@ -1038,6 +1044,7 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
 
                 with gr.Row():
                     clear_done_btn = gr.Button("Clear Finished Jobs", variant="stop")
+                    clear_all_btn = gr.Button("Clear All Jobs", variant="stop")
                     refresh_queue_btn = gr.Button("Refresh Status")
 
                 queue_status_box = gr.Textbox(
@@ -1108,6 +1115,11 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
         )
         clear_done_btn.click(
             fn=clear_done_jobs,
+            inputs=[],
+            outputs=[queue_add_status, queue_status_box],
+        )
+        clear_all_btn.click(
+            fn=clear_all_jobs,
             inputs=[],
             outputs=[queue_add_status, queue_status_box],
         )
