@@ -8,13 +8,14 @@ STAMP="$REPO_DIR/.deps_installed"
 # Clone or update repo
 if [ ! -d "$REPO_DIR" ]; then
     echo ">>> Cloning repo..."
-    git clone https://github.com/tasdelenmuratpdr-hue/anima_trainer "$REPO_DIR"
+    git clone --recurse-submodules https://github.com/tasdelenmuratpdr-hue/anima_trainer "$REPO_DIR"
 else
     echo ">>> Updating repo..."
-    cd "$REPO_DIR" && git pull
+    cd "$REPO_DIR" && git pull && git submodule update --init --recursive
 fi
 
 cd "$REPO_DIR"
+git submodule update --init --recursive
 
 # Install dependencies only if not already done
 if [ ! -f "$STAMP" ]; then
