@@ -172,6 +172,59 @@ time you launch the app.
 
 ---
 
+---
+
+## RunPod ile Bulut Eğitimi (Türkçe Rehber)
+
+Yerel GPU yoksa veya hız gerekiyorsa RunPod.ai üzerinde saniyeler içinde başlatabilirsiniz.
+
+### Pod Aç
+
+- [runpod.io](https://runpod.io) → **Deploy** → **GPU Cloud**
+- Template: **RunPod PyTorch 2.4.0**
+- GPU: RTX A5000 (~$0.27/saat)
+- **Expose HTTP Port**: `7860`
+
+### Terminalde Tek Komut
+
+Pod açıldıktan sonra **Connect → Start Web Terminal**:
+
+```bash
+bash <(curl -s https://raw.githubusercontent.com/tasdelenmuratpdr-hue/anima_trainer/main/runpod_start.sh)
+```
+
+Bu komut repo'yu indirir, paketleri kurar, modelleri indirir ve arayüzü başlatır.
+
+Terminalde `Running on http://0.0.0.0:7860` yazınca → Pod sayfasında **Connect → HTTP [7860]**
+
+### Sonraki Oturumlarda
+
+```bash
+bash /workspace/anima-trainer/runpod_start.sh
+```
+
+### Önerilen Ayarlar (300 resim)
+
+| Ayar | Değer |
+|------|-------|
+| Repeats | 5 |
+| Max Epochs | 3 |
+| Resolution | 768 |
+| Network Dim/Alpha | 32 / 32 |
+| Optimizer | AdamW |
+| Toplam süre | ~83 dakika |
+
+### Sorun Giderme
+
+| Hata | Çözüm |
+|------|-------|
+| `sd-scripts: No such file or directory` | `cd /workspace/anima-trainer && git submodule update --init --recursive` |
+| Arayüz açılmıyor | Pod sayfasında port 7860 expose edilmiş mi kontrol et |
+
+Ayrıntılı rehber: [RUNPOD_REHBERI.md](RUNPOD_REHBERI.md)
+
+---
+
 ## Credits
 
 - Original Colab notebook: [citronlegacy/citron-colab-anima-lora-trainer](https://github.com/citronlegacy/citron-colab-anima-lora-trainer)
