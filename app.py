@@ -575,7 +575,16 @@ def upload_dataset(files, dataset_name: str, captions_zip=None) -> str:
     skipped = []
 
     for f in files:
-        src = Path(f.name) if hasattr(f, "name") else Path(str(f))
+        # Gradio 4.x returns file path strings or objects with .name/.path
+        if isinstance(f, str):
+            src = Path(f)
+        elif hasattr(f, "name"):
+            src = Path(f.name)
+        elif hasattr(f, "path"):
+            src = Path(f.path)
+        else:
+            src = Path(str(f))
+
         ext = src.suffix.lower()
         if ext in IMAGE_EXTS or ext == ".txt":
             dst = dest / src.name
@@ -989,7 +998,6 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
                     upload_name = gr.Textbox(label="Dataset Name", placeholder="my_dataset_v1")
                 upload_files = gr.Files(
                     label="Drag & Drop Images + Caption (.txt) Files",
-                    file_types=["image", ".txt"],
                 )
                 upload_btn = gr.Button("Save Dataset", variant="primary")
                 upload_status = gr.Textbox(label="Upload Status", lines=12, interactive=False)
