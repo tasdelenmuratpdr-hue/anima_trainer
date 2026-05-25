@@ -214,7 +214,7 @@ def create_training_config(
     vae_chunk_size=64, vae_disable_cache=True,
 ) -> str:
     os.makedirs(output_dir, exist_ok=True)
-    ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    ts = datetime.now().strftime("%Y-%m-%d_%H%M%S_%f")
     config_path = CONFIGS_DIR / f"{project_name}_training_{ts}.toml"
     training_config = {
         "pretrained_model_name_or_path": str(dit_model_path),
@@ -265,7 +265,7 @@ def create_training_config(
 def create_dataset_config(
     project_name, image_dir, resolution=768, repeats=5, caption_dropout_rate=0.1
 ) -> str:
-    ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    ts = datetime.now().strftime("%Y-%m-%d_%H%M%S_%f")
     config_path = CONFIGS_DIR / f"{project_name}_dataset_{ts}.toml"
     dataset_config = {
         "general": {
