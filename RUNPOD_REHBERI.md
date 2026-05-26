@@ -48,19 +48,27 @@ Paket kurulumu atlanır, direkt başlar.
 
 ---
 
-## 6. Eğitim Ayarları (300 resim için öneri)
+## 6. Eğitim Ayarları (önerilen)
 
-| Ayar | Değer |
-|------|-------|
-| Repeats | 5 |
-| Max Epochs | 3 |
-| Resolution | 768 |
-| Network Dim | 32 |
-| Network Alpha | 32 |
-| Optimizer | AdamW |
-| Toplam süre | ~83 dakika |
+| Ayar | Değer | Not |
+|------|-------|-----|
+| Repeats | 5 | |
+| Max Epochs | 4 | 5. epoch stili aşırı pişiriyor |
+| Resolution | 768 | **1024'ü geçme** — siyah çıktıya yol açar |
+| Network Dim | 32 | |
+| Network Alpha | 32 | |
+| Optimizer | AdamW | AdamW8bit da çalışır |
+| Mixed Precision | fp16 | **bf16 kullanma** — nan loss ve siyah çıktıya yol açar |
 
-> Adım hesabı: `resim_sayısı × repeats × epoch` = 300 × 5 × 3 = 4500 adım
+> Adım hesabı: `resim_sayısı × repeats × epoch` = 300 × 5 × 4 = 6000 adım
+
+### Advanced Settings (kritik ayarlar)
+
+- **Mixed Precision** → `fp16` (bf16 nan loss yapar → siyah çıktı)
+- **Optimizer** → `AdamW`
+- **Noise Offset** → `0` (sorun çıkarsa sıfırla)
+
+> **Not:** accelerate_gpu.yaml dosyası da fp16 olarak ayarlandı. UI'daki Mixed Precision ile çakışmaması için her zaman ikisi aynı olmalı.
 
 ---
 
@@ -109,7 +117,8 @@ Eğitim bittikten sonra pod sayfasında → **Stop** (Terminate değil, dosyalar
 | `Training script not found: .../anima_train_network.py` | Aşağıya bak |
 | `accelerate not found` | Script otomatik bulur, sorun devam ederse `pip install accelerate` |
 | Arayüz açılmıyor | Pod sayfasında port 7860 expose edilmiş mi kontrol et |
-| `avr_loss=nan` | Optimizer'ı AdamW yap, AdamW8bit deneme |
+| `avr_loss=nan` + siyah çıktı | Mixed Precision'ı fp16 yap, bf16 kullanma |
+| Resolution 1024+ → siyah çıktı | Resolution'ı 768'de tut |
 | Terminal boş satırda bekliyor | Bekle — büyük repo indiriyor olabilir (2-3 dk) |
 
 ### sd-scripts eksik hatası
