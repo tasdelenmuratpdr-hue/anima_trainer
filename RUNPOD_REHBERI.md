@@ -119,6 +119,7 @@ Eğitim bittikten sonra pod sayfasında → **Stop** (Terminate değil, dosyalar
 | Arayüz açılmıyor | Pod sayfasında port 7860 expose edilmiş mi kontrol et |
 | `avr_loss=nan` + siyah çıktı | Mixed Precision'ı fp16 yap, bf16 kullanma |
 | Resolution 1024+ → siyah çıktı | Resolution'ı 768'de tut |
+| 2K+ resimler → siyah çıktı / hata | Resimleri 1024px'e küçült (IrfanView veya XnConvert ile toplu resize) |
 | Terminal boş satırda bekliyor | Bekle — büyük repo indiriyor olabilir (2-3 dk) |
 
 ### sd-scripts eksik hatası
