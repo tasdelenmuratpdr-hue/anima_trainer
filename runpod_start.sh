@@ -49,6 +49,15 @@ if [ ! -f "$MODELS_DIR/vae/qwen_image_vae.safetensors" ]; then
         "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/vae/qwen_image_vae.safetensors"
 fi
 
+# Download anima base model if no DiT model exists at all
+if [ -z "$(ls -A $MODELS_DIR/dit/*.safetensors 2>/dev/null)" ]; then
+    echo ">>> Downloading anima-base-v1.0 DiT model (4.18 GB)..."
+    wget -q --show-progress -O "$MODELS_DIR/dit/anima-base-v1.0.safetensors" \
+        "https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/diffusion_models/anima-base-v1.0.safetensors"
+else
+    echo ">>> DiT model already present, skipping download."
+fi
+
 # ---------------------------------------------------------------------------
 # 4. Launch app
 # ---------------------------------------------------------------------------
