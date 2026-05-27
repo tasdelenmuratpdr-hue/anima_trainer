@@ -536,10 +536,21 @@ def _run_training_subprocess(train_cfg, dataset_cfg, gpu_idx, threads, base_mode
 
 
 def start_training(custom_config_path: str, gpu_index_choice: str,
-                   num_cpu_threads_per_process: int, base_model: str):
-    saved_cfg = load_config()
-    train_cfg = custom_config_path.strip() if custom_config_path.strip() else saved_cfg.get("last_train_config", "")
-    dataset_cfg = saved_cfg.get("last_dataset_config", "")
+                   num_cpu_threads_per_process: int, base_model: str,
+                   state_train_cfg: str, state_dataset_cfg: str):
+    # Use state paths (set by Configure Training) — fall back to config.json only if state is empty
+    if custom_config_path.strip():
+        train_cfg = custom_config_path.strip()
+        saved_cfg = load_config()
+        dataset_cfg = saved_cfg.get("last_dataset_config", "")
+    elif state_train_cfg and state_dataset_cfg:
+        train_cfg = state_train_cfg
+        dataset_cfg = state_dataset_cfg
+    else:
+        saved_cfg = load_config()
+        train_cfg = saved_cfg.get("last_train_config", "")
+        dataset_cfg = saved_cfg.get("last_dataset_config", "")
+
     log_lines: list[str] = []
 
     def emit(line):
@@ -1001,7 +1012,7 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
                     with gr.Row():
                         noise_offset = gr.Number(label="Noise Offset", value=cfg["noise_offset"])
                         multires_noise_discount = gr.Number(label="Multires Noise Discount", value=cfg["multires_noise_discount"])
-                        timestep_sampling = gr.Dropdown(label="Timestep Sampling", choices=["sigmoid", "uniform", "logit_normal"], value=cfg["timestep_sampling"])
+                        timestep_sampling = gr.Dropdown(label="Timestep Sampling", choices=["sigmoid", "uniform", "sigma", "shift", "flux_shift"], value=cfg["timestep_sampling"])
                         discrete_flow_shift = gr.Number(label="Discrete Flow Shift", value=cfg["discrete_flow_shift"])
 
                 with gr.Group():
@@ -1117,7 +1128,8 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
         )
         train_btn.click(
             fn=start_training,
-            inputs=[custom_config_input, gpu_dropdown, num_cpu_threads, base_model_dropdown],
+            inputs=[custom_config_input, gpu_dropdown, num_cpu_threads, base_model_dropdown,
+                    last_train_cfg, last_dataset_cfg],
             outputs=[log_box],
         )
         stop_btn.click(
