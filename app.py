@@ -495,12 +495,14 @@ def _run_training_subprocess(train_cfg, dataset_cfg, gpu_idx, threads, base_mode
     env["PYTHONUNBUFFERED"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
 
+    global _current_process
     try:
         process = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             universal_newlines=True, bufsize=1, env=env, cwd=str(ROOT),
             encoding="utf-8", errors="ignore",
         )
+        _current_process = process
     except FileNotFoundError:
         yield emit("❌ 'accelerate' not found. Make sure the venv is activated.")
         return
@@ -517,8 +519,11 @@ def _run_training_subprocess(train_cfg, dataset_cfg, gpu_idx, threads, base_mode
             yield emit(line)
 
     exit_code = process.wait()
+    _current_process = None
     if exit_code == 0:
         yield emit(f"\n✓ Training completed!\nLoRA saved to: {saved_cfg.get('output_directory', '?')}\nLog: {log_file_path}")
+    elif exit_code == -15:
+        yield emit(f"\n⏹ Training stopped by user.")
     else:
         yield emit(f"\n✗ Training failed (exit code: {exit_code})\nLog: {log_file_path}")
         try:
@@ -629,6 +634,19 @@ def list_datasets() -> list[str]:
 _queue_lock = threading.Lock()
 _active_job_log: list[str] = []
 _queue_running = False
+_current_process = None  # Active training subprocess
+
+
+def stop_training() -> str:
+    global _current_process
+    if _current_process is None:
+        return "⚠ No training process running."
+    try:
+        _current_process.terminate()
+        _current_process = None
+        return "✓ Training stopped."
+    except Exception as e:
+        return f"❌ Could not stop: {e}"
 
 
 def load_queue() -> list[dict]:
@@ -921,6 +939,7 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
                 with gr.Row():
                     configure_btn = gr.Button("Configure Training", variant="secondary", size="lg")
                     train_btn = gr.Button("Start Training", variant="primary", size="lg")
+                    stop_btn = gr.Button("Stop Training", variant="stop", size="lg")
 
                 custom_config_input = gr.Textbox(
                     label="Override Training Config Path (optional — leave blank to use last generated)",
@@ -1099,6 +1118,11 @@ Created by [Citron Legacy](https://x.com/Citron_Legacy) — [GitHub](https://git
         train_btn.click(
             fn=start_training,
             inputs=[custom_config_input, gpu_dropdown, num_cpu_threads, base_model_dropdown],
+            outputs=[log_box],
+        )
+        stop_btn.click(
+            fn=stop_training,
+            inputs=[],
             outputs=[log_box],
         )
 
